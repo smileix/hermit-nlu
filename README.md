@@ -24,13 +24,12 @@ git clone https://gitlab.com/hwu-ilab/hermit-nlu.git && cd hermit-nlu
 You can create a virtual environment if needed (recommended):
 
 ```
-sudo pip install -U virtualenv
-virtualenv --system-site-packages -p python2.7 ./hermit-venv
+conda create -n hermit-nlu python=2.7
 ```
 and activate it:
 
 ```
-source ./hermit-venv/bin/activate
+source activate hermit-nlu
 ```
 
 ### Requirements installation
@@ -77,28 +76,6 @@ A script computes the metrics reported in Table 3 and 4:
 ```
 python data/nlu_benchmark/evaluation.py -f resources/evaluation/predictions/
 ```
-
- 
-## Usage
-
-If you want to use the system as a server, the models have to be trained:
-
-```
-python main.py -n hermit -m training --run-folder training -d datasets/nlu_benchmark_hrc2/KFold_1 --gpu 0
-```
-
-Then, you can run the server:
-
-```
-python server.py -n hermit -o json --run-folder resources/training -p 9876
-```
-
-A simple client is provided to query the server and obtain the interpretations:
-
-```
-python client.py
-```
-
 
 ## References
 
