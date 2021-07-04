@@ -1,0 +1,16 @@
+Flask_Cors==3.0.6
+numpy==1.15.4
+Flask==0.12.4
+spacy==2.0.12
+requests==2.19.1
+# TensorFlow can be installed either as CPU or GPU versions.
+# You select which one to install by (un)commenting these lines.
+tensorflow==1.9.0		# CPU Version of TensorFlow.
+# tensorflow-gpu==1.9.0	# GPU version of TensorFlow.
+keras==2.2.2
+scikit_learn==0.20.1
+keras-self-attention==0.32.0
+keras-layer-normalization==0.6.0
+tensorflow_hub==0.2.0
+pandas
+progress
