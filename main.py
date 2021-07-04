@@ -3,6 +3,9 @@ import argparse
 import os
 from sklearn.model_selection import ParameterGrid
 
+# argparse 模块可以让人轻松编写用户友好的命令行接口。程序定义它需要的参数，然后 argparse 将弄清如何从 sys.argv 解析出那些参数
+# 先生成一个对象实例
+# 后使用add_argument进行参数设置，设置option，设置type，设置default，设置help。之后可以使用python 【py文件】 option 参数 调用
 parser = argparse.ArgumentParser(description='HERMIT NLU - HiERarchical MultI-Task Natural Language Understanding')
 parser.add_argument('-n', '--network', type=str, default='hermit',
                     help='Network topology [default="hermit"]')
