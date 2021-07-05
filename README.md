@@ -55,7 +55,7 @@ https://github.com/xliuhw/NLU-Evaluation-Data
 chmod +x data_process.sh && ./data_process.sh
 ```
 
-处理之后，则不再需要原始数据。
+处理之后，会生成datasets目录，且不再需要原始数据。
 
 ## 训练与测试
 
