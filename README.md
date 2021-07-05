@@ -1,6 +1,6 @@
 # HERMIT NLU - HiERarchical MultI-Task Natural Language Understanding
 
-*HERMIT NLU* 是一种新的神经架构，用于在口语对话系统中进行广泛的自然语言理解。 它基于分层多任务架构，提供句子含义的多层表示,包括domain、frame与frame element，后两者可分别映射为意图与槽。 该架构是自注意力机制和 BiLSTM 编码器的层次结构，后跟 CRF 标记层。
+*HERMIT NLU* 是一种新的神经架构，用于在口语对话系统中进行广泛的自然语言理解。 它基于分层多任务架构，提供句子含义的多层表示,包括domain、frame与frame argument（也即frame element），后两者可分别映射为意图与槽。 该架构是自注意力机制和 BiLSTM 编码器的层次结构，后跟 CRF 标记层。
 <center>
 	<img src="hermit_architecture.png" alt="Hermit Architecture" width="500" />
 </center>
