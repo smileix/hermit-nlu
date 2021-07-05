@@ -37,13 +37,13 @@ source activate hermit-nlu
 pip install -r requirements.txt
 ```
 
-下载并安装[spaCy](https://spacy.io)的英文模型:
+下载并安装[spacy](https://spacy.io)的英文模型:
 
 ```
 python -m spacy download en
 ```
 
-### Dataset download and conversion
+### 数据预处理
 
 实验所用的原始数据集已经clone到本repo中，下面是其原始地址：
 ```
