@@ -2,7 +2,7 @@
 
 *HERMIT NLU* 是一种新的神经架构，用于在口语对话系统中进行广泛的自然语言理解。 它基于分层多任务架构，提供句子含义的多层表示,包括domain、frame与frame element，后两者可分别映射为意图与槽。 该架构是自注意力机制和 BiLSTM 编码器的层次结构，后跟 CRF 标记层。
 <center>
-	<img {text-align:center;} src="hermit_architecture.png" alt="Hermit Architecture" width="500" />
+	<img src="hermit_architecture.png" alt="Hermit Architecture" width="500" />
 </center>
 
 已进行了若干实验，表明这种方法在以domain和frame semantic（即frame与frame element）为注释的数据集上取得了有希望的结果。HERMIT NLU还可以模拟面向应用程序的注释方案。对公开可用的 NLU 数据集的实验表明，HERMIT 提供的总体性能高于最先进的工具，如 RASA、Dialogflow、LUIS 和 Watson。
