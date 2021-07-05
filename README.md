@@ -74,7 +74,7 @@ export https_proxy="http://[your_proxy_ip]:[your_proxy_port]"
 
 脚本将在 NLU-基准数据集上执行 10Fold 评估并生成文件夹。文件中提到文件中报告的exact match，以及 CoNLL spanF1
 
-评测结果会保存到resource/evaluation文件夹中，有三个子目录，分别是encoder，用于保存每个fold的训练数据，predication，用于保存每个fold的预测结果，results，用于保存每个fold预的测指标。
+评测结果会保存到resource/evaluation目录中，有三个子目录，分别是encoder，用于保存每个fold的训练数据，predication，用于保存每个fold的预测结果，results，用于保存每个fold预的测指标。
 
 总体指标由下面的命令计算：
 ```
