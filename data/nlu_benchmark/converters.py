@@ -28,23 +28,23 @@ def squeeze_prediction_span(json_prediction):
     for example in json_prediction:
         new_example = dict()
         frame_pred_set = set()
-        dialogue_act_pred_set = set()
+        domain_pred_set = set()
         intent_pred_set = set()
         frame_gold_set = set()
-        dialogue_act_gold_set = set()
+        domain_gold_set = set()
         intent_gold_set = set()
         entities_gold = []
         entities_pred = []
         current_frame_element_gold = ''
         current_frame_element_pred = ''
-        for frame_token, dialogue_act_token in zip(example['frame_gold'], example['dialogue_act_gold']):
+        for frame_token, domain_token in zip(example['frame_gold'], example['domain_gold']):
             frame_gold_set.add(frame_token[2:])
-            dialogue_act_gold_set.add(dialogue_act_token[2:])
-            intent_gold_set.add(dialogue_act_token[2:] + '_' + frame_token[2:])
-        for frame_token, dialogue_act_token in zip(example['frame_pred'], example['dialogue_act_pred']):
+            domain_gold_set.add(domain_token[2:])
+            intent_gold_set.add(domain_token[2:] + '_' + frame_token[2:])
+        for frame_token, domain_token in zip(example['frame_pred'], example['domain_pred']):
             frame_pred_set.add(frame_token[2:])
-            dialogue_act_pred_set.add(dialogue_act_token[2:])
-            intent_pred_set.add(dialogue_act_token[2:] + '_' + frame_token[2:])
+            domain_pred_set.add(domain_token[2:])
+            intent_pred_set.add(domain_token[2:] + '_' + frame_token[2:])
         for frame_element_token, token in zip(example['frame_element_gold'], example['tokens']):
             if frame_element_token == "O":
                 continue
@@ -79,8 +79,8 @@ def squeeze_prediction_span(json_prediction):
                     entity_pred[current_frame_element_pred] = [token]
 
         new_example['tokens'] = example['tokens']
-        new_example['dialogue_act_gold'] = list(dialogue_act_gold_set)
-        new_example['dialogue_act_pred'] = list(dialogue_act_pred_set)
+        new_example['domain_gold'] = list(domain_gold_set)
+        new_example['domain_pred'] = list(domain_pred_set)
         new_example['frame_gold'] = list(frame_gold_set)
         new_example['frame_pred'] = list(frame_pred_set)
         new_example['intent_gold'] = list(intent_gold_set)
@@ -140,7 +140,7 @@ def extrapolate_frame_elements(sentence):
     return frame_elements, replaced_sentence
 
 
-def generate_annotation_file(sentence, dialog_act, frame,
+def generate_annotation_file(sentence, domain, frame,
                              frame_elements, ann_id, output_dir):
 
     def set_all_attrib_from_dict(xml_element, attr_dict):
@@ -154,7 +154,7 @@ def generate_annotation_file(sentence, dialog_act, frame,
     tokens_xml = ET.SubElement(example_xml, "tokens")
     semantics_xml = ET.SubElement(example_xml, "semantics")
     ners_xml = ET.SubElement(semantics_xml, "ner")
-    dialogacts_xml = ET.SubElement(semantics_xml, "dialogueAct")
+    dialogacts_xml = ET.SubElement(semantics_xml, "domain")
     frames_xml = ET.SubElement(semantics_xml, "frame")
     frame_elements_xml = ET.SubElement(frames_xml, "frameElement")
 
@@ -177,9 +177,9 @@ def generate_annotation_file(sentence, dialog_act, frame,
 
         # dialogue act
         iob = "B-" if i == 0 else "I-"
-        da_ann = "{}{}".format(iob, dialog_act)
-        da_token_xml = ET.SubElement(dialogacts_xml, "token")
-        set_all_attrib_from_dict(da_token_xml, {"id": str(i+1), "value": da_ann})
+        domain_ann = "{}{}".format(iob, domain)
+        domain_token_xml = ET.SubElement(dialogacts_xml, "token")
+        set_all_attrib_from_dict(domain_token_xml, {"id": str(i+1), "value": domain_ann})
 
         # frames
         frame_ann = "{}{}".format(iob, frame)

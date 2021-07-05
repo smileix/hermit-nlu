@@ -55,10 +55,10 @@ def hermit(hyper_params, embedding_matrices, labels):
                                                     return_attention=True)(shared_network)
 
     shared_network1 = Dropout(rate=hyper_params['dropout'])(shared_network)
-    output1 = TimeDistributed(Dense(units=labels['dialogue_act'],
+    output1 = TimeDistributed(Dense(units=labels['domain'],
                                     activation='relu'))(shared_network1)
-    crf_da = CRF(labels['dialogue_act'], name='dialogue_act')
-    output1 = crf_da(output1)
+    crf_domain = CRF(labels['domain'], name='domain')
+    output1 = crf_domain(output1)
 
     shared_network = concatenate([input_embeddings, shared_network])
 

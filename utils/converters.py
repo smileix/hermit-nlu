@@ -7,9 +7,9 @@ import xml.dom.minidom
 def annotation_to_token(annotation):
     for token in annotation['tokens']:
         token['frameElement'] = token.get('frame_element', '')
-        token['dialogueAct'] = token.get('dialogue_act', '')
+        token['domain'] = token.get('domain', '')
         token.pop('frame_element', None)
-        token.pop('dialogue_act', None)
+        token.pop('domain', None)
     return annotation
 
 
@@ -18,7 +18,7 @@ def annotation_to_json(annotation):
     result['syntax'] = []
     result['semantics'] = []
     result['named_entities'] = []
-    dialogue_act_span = []
+    domain_span = []
     frame_span = []
     frame_element_span = []
 
@@ -49,30 +49,30 @@ def annotation_to_json(annotation):
                     result['named_entities'].append(current_ner)
                 current_ner[current_annotation_name].append(token['word'])
 
-        ann = token['dialogue_act']
+        ann = token['domain']
         if ann != 'O':
             if ann.startswith('B-'):
                 current_annotation = [i]
                 current_annotation_name = ann.replace('B-', '')
-                dialogue_act_span.append(current_annotation)
+                domain_span.append(current_annotation)
             elif ann.startswith('I-'):
                 annotation_name = ann.replace('I-', '')
                 if annotation_name == current_annotation_name:
                     current_annotation.append(i)
                 else:
                     success = False
-                    for d in dialogue_act_span[::-1]:
-                        if annotation['tokens'][d[0]]['dialogue_act'].split('-')[1] == annotation_name:
+                    for d in domain_span[::-1]:
+                        if annotation['tokens'][d[0]]['domain'].split('-')[1] == annotation_name:
                             d.append(i)
                             success = True
                             break
                     if not success:
                         current_annotation = [i]
                         current_annotation_name = ann.replace('B-', '')
-                        dialogue_act_span.append(current_annotation)
+                        domain_span.append(current_annotation)
 
-    for da in dialogue_act_span:
-        for i in da:
+    for domain in domain_span:
+        for i in domain:
             ann = annotation['tokens'][i]['frame']
             if ann != 'O':
                 if ann.startswith('B-'):
@@ -85,7 +85,7 @@ def annotation_to_json(annotation):
                         current_annotation.append(i)
                     else:
                         success = False
-                        for d in da[::-1]:
+                        for d in domain[::-1]:
                             try:
                                 if annotation['tokens'][d]['frame'].split('-')[1] == annotation_name and d != i:
                                     for fr in frame_span[::-1]:
@@ -135,17 +135,17 @@ def annotation_to_json(annotation):
                             current_annotation_name = ann.replace('B-', '')
                             frame_element_span.append(current_annotation)
 
-    for da in dialogue_act_span:
-        current_dialogue_act = dict()
-        current_dialogue_act_name = annotation['tokens'][da[0]]['dialogue_act'].split('-')[1]
-        current_dialogue_act[current_dialogue_act_name] = []
-        result['semantics'].append(current_dialogue_act)
+    for domain in domain_span:
+        current_domain = dict()
+        current_domain_name = annotation['tokens'][domain[0]]['domain'].split('-')[1]
+        current_domain[current_domain_name] = []
+        result['semantics'].append(current_domain)
         for fr in frame_span:
-            if any(elem in da for elem in fr):
+            if any(elem in domain for elem in fr):
                 current_frame = dict()
                 current_frame_name = annotation['tokens'][fr[0]]['frame'].split('-')[1]
                 current_frame[current_frame_name] = []
-                current_dialogue_act[current_dialogue_act_name].append(current_frame)
+                current_domain[current_domain_name].append(current_frame)
                 for fe in frame_element_span:
                     if any(elem in fr for elem in fe):
                         current_frame_element = dict()
@@ -165,7 +165,7 @@ def annotation_to_hrc(example_id, annotation):
     tokens = et.SubElement(example, 'tokens')
     semantics = et.SubElement(example, 'semantics')
     ner = et.SubElement(semantics, 'ner')
-    dialogue_act = et.SubElement(semantics, 'dialogueAct')
+    domain = et.SubElement(semantics, 'domain')
     frame = et.SubElement(semantics, 'frame')
     frame_element = et.SubElement(frame, 'frameElement')
     for i, t in enumerate(annotation['tokens']):
@@ -174,9 +174,9 @@ def annotation_to_hrc(example_id, annotation):
         if t['ner'] != 'O':
             token_ner = et.SubElement(ner, 'token')
             token_ner.attrib = {'id': str(t['index']), 'value': t['ner']}
-        if t['dialogue_act'] != 'O':
-            token_da = et.SubElement(dialogue_act, 'token')
-            token_da.attrib = {'id': str(t['index']), 'value': t['dialogue_act']}
+        if t['domain'] != 'O':
+            token_domain = et.SubElement(domain, 'token')
+            token_domain.attrib = {'id': str(t['index']), 'value': t['domain']}
         if t['frame'] != 'O':
             token_frm = et.SubElement(frame, 'token')
             token_frm.attrib = {'id': str(t['index']), 'value': t['frame']}

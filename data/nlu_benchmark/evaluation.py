@@ -13,9 +13,9 @@ def evaluate(predictions_file):
     intent_fp = 0.
     intent_fn = 0.
 
-    dialogue_act_tp = 0.
-    dialogue_act_fp = 0.
-    dialogue_act_fn = 0.
+    domain_tp = 0.
+    domain_fp = 0.
+    domain_fn = 0.
 
     frame_tp = 0.
     frame_fp = 0.
@@ -44,14 +44,14 @@ def evaluate(predictions_file):
                 intent_fp += 1
 
         # Dialogue act confusion matrix
-        for dialogue_act_gold in example['dialogue_act_gold']:
-            if dialogue_act_gold in example['dialogue_act_pred']:
-                dialogue_act_tp += 1
+        for domain_gold in example['domain_gold']:
+            if domain_gold in example['domain_pred']:
+                domain_tp += 1
             else:
-                dialogue_act_fn += 1
-        for dialogue_act_pred in example['dialogue_act_pred']:
-            if dialogue_act_pred not in example['dialogue_act_gold']:
-                dialogue_act_fp += 1
+                domain_fn += 1
+        for domain_pred in example['domain_pred']:
+            if domain_pred not in example['domain_gold']:
+                domain_fp += 1
 
         # Frame confusion matrix
         for frame_gold in example['frame_gold']:
@@ -97,9 +97,9 @@ def evaluate(predictions_file):
     intent_recall = intent_tp / (intent_tp + intent_fn)
     intent_f1 = (2 * intent_precision * intent_recall) / (intent_precision + intent_recall)
 
-    dialogue_act_precision = dialogue_act_tp / (dialogue_act_tp + dialogue_act_fp)
-    dialogue_act_recall = dialogue_act_tp / (dialogue_act_tp + dialogue_act_fn)
-    dialogue_act_f1 = (2 * dialogue_act_precision * dialogue_act_recall) / (dialogue_act_precision + dialogue_act_recall)
+    domain_precision = domain_tp / (domain_tp + domain_fp)
+    domain_recall = domain_tp / (domain_tp + domain_fn)
+    domain_f1 = (2 * domain_precision * domain_recall) / (domain_precision + domain_recall)
 
     frame_precision = frame_tp / (frame_tp + frame_fp)
     frame_recall = frame_tp / (frame_tp + frame_fn)
@@ -116,16 +116,13 @@ def evaluate(predictions_file):
     print('Combined scores: P: {}, R: {}, F1: {}'.format(combined_precision,
                                                          combined_recall,
                                                          combined_f1))
-    print('Intent scores: P: {}, R: {}, F1: {}'.format(intent_precision,
-                                                       intent_recall,
-                                                       intent_f1))
-    print('Dialogue act scores: P: {}, R: {}, F1: {}'.format(dialogue_act_precision,
-                                                             dialogue_act_recall,
-                                                             dialogue_act_f1))
+    print('Domain scores: P: {}, R: {}, F1: {}'.format(domain_precision,
+                                                             domain_recall,
+                                                             domain_f1))
     print('Frame scores: P: {}, R: {}, F1: {}'.format(frame_precision,
                                                       frame_recall,
                                                       frame_f1))
-    print('Entity scores: P: {}, R: {}, F1: {}'.format(entity_precision,
+    print('Frame element scores: P: {}, R: {}, F1: {}'.format(entity_precision,
                                                        entity_recall,
                                                        entity_f1))
 

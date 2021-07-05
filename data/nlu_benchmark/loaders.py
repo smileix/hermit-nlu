@@ -57,12 +57,12 @@ class SSPLoader:
                 nes.add(ne["ne"])
         return list(nes)
 
-    def get_da_types(self):
-        das = set()
+    def get_domain_types(self):
+        domain = set()
         for example in self.dataset:
-            for da in example["dialogue_acts"]:
-                das.add(da["dialogue_act"])
-        return list(das)
+            for domain in example["domains"]:
+                domain.add(domain["domain"])
+        return list(domain)
 
     def get_stats(self):
         stats = {
@@ -84,12 +84,12 @@ class SSPLoader:
             stats["# frames"] += len(e["frame_semantics"])
             stats["# arguments"] += len([a for f in e["frame_semantics"] for a in f["frame_elements"]])
             stats["# named entities"] += len(e["ner"])
-            stats["# dialogue acts"] += len(e["dialogue_acts"])
+            stats["# dialogue acts"] += len(e["domains"])
 
         stats["# frame types"] = len(self.get_arg_types())
         stats["# argument types"] = len(self.get_arg_types())
         stats["# dialogue act types"] = len(self.get_ner_types())
-        stats["# named enetity types"] = len(self.get_da_types())
+        stats["# named enetity types"] = len(self.get_domain_types())
 
         return stats
 
@@ -112,8 +112,8 @@ class SSPLoader:
                     adv_stats["arguments types"][a["frame_element"]] += 1
             for ne in e["ner"]:
                 adv_stats["named entity types"][ne["ne"]] += 1
-            for da in e["dialogue_acts"]:
-                adv_stats["dialogue act types"][da["dialogue_act"]] += 1
+            for domain in e["domains"]:
+                adv_stats["dialogue act types"][domain["domain"]] += 1
 
         stats.update(dict(adv_stats))
         return stats
@@ -188,28 +188,28 @@ class SSPLoader:
         hrc2["ner"].extend([n for ne in nes.values() for n in ne])
 
         # dialogues acts
-        hrc2["dialogue_acts"] = list()
-        da_tokens = root.findall("./semantics/dialogueAct/")
-        das = defaultdict(lambda: 0)
+        hrc2["domains"] = list()
+        domain_tokens = root.findall("./semantics/domain/")
+        domain = defaultdict(lambda: 0)
         # probably for named entities this is even too paranoid
-        for da_token in da_tokens:
-            cur_da = da_token.attrib["value"]
-            cur_da_name = cur_da[2:]
-            cur_da_iob = cur_da[:2]
-            cur_token_id = int(da_token.attrib["id"])
+        for domain_token in domain_tokens:
+            cur_domain = domain_token.attrib["value"]
+            cur_domain_name = cur_domain[2:]
+            cur_domain_iob = cur_domain[:2]
+            cur_token_id = int(domain_token.attrib["id"])
 
-            if cur_da_name not in das.keys():
-                das[cur_da_name] = list()
+            if cur_domain_name not in domain.keys():
+                domain[cur_domain_name] = list()
 
-            cur_da_array = das[cur_da_name]
+            cur_domain_array = domain[cur_domain_name]
 
-            if cur_da_iob == "B-":
-                new_da = {"dialogue_act": cur_da_name, "tokens": [cur_token_id]}
-                cur_da_array.append(new_da)
-            elif cur_da_iob == "I-":
-                da = cur_da_array[-1]
-                da["tokens"].append(cur_token_id)
-        hrc2["dialogue_acts"].extend([d for da in das.values() for d in da])
+            if cur_domain_iob == "B-":
+                new_domain = {"domain": cur_domain_name, "tokens": [cur_token_id]}
+                cur_domain_array.append(new_domain)
+            elif cur_domain_iob == "I-":
+                domain = cur_domain_array[-1]
+                domain["tokens"].append(cur_token_id)
+        hrc2["domains"].extend([d for domain in domain.values() for d in domain])
 
         # frame semantics
         hrc2["frame_semantics"] = list()
@@ -325,28 +325,28 @@ class SSPLoader:
         hrc3["ner"].extend([n for ne in nes.values() for n in ne])
 
         # dialogues acts
-        hrc3["dialogue_acts"] = list()
-        da_tokens = root.findall("./semantics/dialogueAct/")
-        das = defaultdict(lambda: 0)
+        hrc3["domains"] = list()
+        domain_tokens = root.findall("./semantics/domain/")
+        domain = defaultdict(lambda: 0)
         # probably for named entities this is even too paranoid
-        for da_token in da_tokens:
-            cur_da = da_token.attrib["value"]
-            cur_da_name = cur_da[2:]
-            cur_da_iob = cur_da[:2]
-            cur_token_id = int(da_token.attrib["id"])
+        for domain_token in domain_tokens:
+            cur_domain = domain_token.attrib["value"]
+            cur_domain_name = cur_domain[2:]
+            cur_domain_iob = cur_domain[:2]
+            cur_token_id = int(domain_token.attrib["id"])
 
-            if cur_da_name not in das.keys():
-                das[cur_da_name] = list()
+            if cur_domain_name not in domain.keys():
+                domain[cur_domain_name] = list()
 
-            cur_da_array = das[cur_da_name]
+            cur_domain_array = domain[cur_domain_name]
 
-            if cur_da_iob == "B-":
-                new_da = {"dialogue_act": cur_da_name, "tokens": [cur_token_id]}
-                cur_da_array.append(new_da)
-            elif cur_da_iob == "I-":
-                da = cur_da_array[-1]
-                da["tokens"].append(cur_token_id)
-        hrc3["dialogue_acts"].extend([d for da in das.values() for d in da])
+            if cur_domain_iob == "B-":
+                new_domain = {"domain": cur_domain_name, "tokens": [cur_token_id]}
+                cur_domain_array.append(new_domain)
+            elif cur_domain_iob == "I-":
+                domain = cur_domain_array[-1]
+                domain["tokens"].append(cur_token_id)
+        hrc3["domains"].extend([d for domain in domain.values() for d in domain])
 
         # frame semantics
         hrc3["frame_semantics"] = list()

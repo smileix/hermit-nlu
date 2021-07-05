@@ -15,7 +15,7 @@ class Dataset(object):
     train_set = []
     test_set = []
     embeddings = OrderedDict()
-    labels = ['dialogue_act', 'frame', 'frame_element']
+    labels = ['domain', 'frame', 'frame_element']
     feature_encoders = OrderedDict()
     label_encoders = OrderedDict()
     encoders_path = None
@@ -103,11 +103,11 @@ class Dataset(object):
             self.max_sentence_length = sentence_length
         huric_example['sentence_length'] = sentence_length
         ner_annotations = np.full(sentence_length, fill_value='O', dtype='object')
-        dialogue_act_annotations = np.full(sentence_length, fill_value='O', dtype='object')
+        domain_annotations = np.full(sentence_length, fill_value='O', dtype='object')
         frame_annotations = np.full(sentence_length, fill_value='O', dtype='object')
         frame_element_annotations = np.full(sentence_length, fill_value='O', dtype='object')
-        for dialogue_act in root.findall('./semantics/dialogueAct/token'):
-            dialogue_act_annotations[int(dialogue_act.attrib['id']) - 1] = dialogue_act.attrib['value']
+        for domain in root.findall('./semantics/domain/token'):
+            domain_annotations[int(domain.attrib['id']) - 1] = domain.attrib['value']
         for ner in root.findall('./semantics/ner/token'):
             ner_annotations[int(ner.attrib['id']) - 1] = ner.attrib['value']
         for frame in root.findall('./semantics/frame/token'):
@@ -115,7 +115,7 @@ class Dataset(object):
         for frame_element in root.findall('./semantics/frame/frameElement/token'):
             frame_element_annotations[int(frame_element.attrib['id']) - 1] = frame_element.attrib['value']
         huric_example['ner'] = ner_annotations
-        huric_example['dialogue_act'] = dialogue_act_annotations
+        huric_example['domain'] = domain_annotations
         huric_example['frame'] = frame_annotations
         huric_example['frame_element'] = frame_element_annotations
         return huric_example
@@ -292,27 +292,27 @@ class Dataset(object):
         np.random.seed(42)
         distribution = self.statistics()
         self.generate_label_encoders()
-        dialogue_act_labels = self.label_encoders['dialogue_act'].classes_
+        domain_labels = self.label_encoders['domain'].classes_
         frame_labels = self.label_encoders['frame'].classes_
         frame_element_labels = self.label_encoders['frame_element'].classes_
 
-        dialogue_act_labels = np.delete(dialogue_act_labels, np.argwhere(dialogue_act_labels == 'AAA_PADDING'))
+        domain_labels = np.delete(domain_labels, np.argwhere(domain_labels == 'AAA_PADDING'))
         frame_labels = np.delete(frame_labels, np.argwhere(frame_labels == 'AAA_PADDING'))
         frame_element_labels = np.delete(frame_element_labels, np.argwhere(frame_element_labels == 'AAA_PADDING'))
-        dialogue_act_labels = np.delete(dialogue_act_labels, np.argwhere(dialogue_act_labels == 'O'))
+        domain_labels = np.delete(domain_labels, np.argwhere(domain_labels == 'O'))
         frame_labels = np.delete(frame_labels, np.argwhere(frame_labels == 'O'))
         frame_element_labels = np.delete(frame_element_labels, np.argwhere(frame_element_labels == 'O'))
 
-        dialogue_act_labels = list(set([label.replace('B-', '').replace('I-', '') for label in dialogue_act_labels]))
+        domain_labels = list(set([label.replace('B-', '').replace('I-', '') for label in domain_labels]))
         frame_labels = list(set([label.replace('B-', '').replace('I-', '') for label in frame_labels]))
         frame_element_labels = list(set([label.replace('B-', '').replace('I-', '') for label in frame_element_labels]))
 
-        dialogue_act_distribution = []
+        domain_distribution = []
         frame_distribution = []
         frame_element_distribution = []
-        for label in dialogue_act_labels:
-            print(label, distribution['dialogue_act'][label])
-            dialogue_act_distribution.append(distribution['dialogue_act'][label])
+        for label in domain_labels:
+            print(label, distribution['domain'][label])
+            domain_distribution.append(distribution['domain'][label])
         for label in frame_labels:
             frame_distribution.append(distribution['frame'][label])
         for label in frame_element_labels:
@@ -327,17 +327,17 @@ class Dataset(object):
             y_pred = []
             for example in fold:
                 new_example = []
-                for token in example['dialogue_act']:
+                for token in example['domain']:
                     if token.startswith('B-'):
                         current_label = token.split('-')[1]
-                        random_label = np.random.choice(dialogue_act_labels, 1, dialogue_act_distribution)[0]
+                        random_label = np.random.choice(domain_labels, 1, domain_distribution)[0]
                         new_token = token.replace(current_label, random_label)
                     else:
                         new_token = token.replace(current_label, random_label)
                     new_example.append(new_token)
-                y_true.append(example['dialogue_act'].tolist())
+                y_true.append(example['domain'].tolist())
                 y_pred.append(new_example)
-            y['dialogue_act'] = (y_true, y_pred)
+            y['domain'] = (y_true, y_pred)
             y_true = []
             y_pred = []
             for example in fold:
@@ -373,27 +373,27 @@ class Dataset(object):
 
     def statistics(self):
         avg_length_of_sentence = .0
-        total_number_of_dialogue_act = 0
+        total_number_of_domain = 0
         total_number_of_frame = 0
         total_number_of_frame_element = 0
-        dialogue_act_number = dict()
+        domain_number = dict()
         frame_number = dict()
         frame_element_number = dict()
         lexical_unit_distribution = dict()
-        dialogue_act_predicates = 0.
+        domain_predicates = 0.
         frame_predicates = 0.
         frame_element_predicates = 0.
         for example in self.dataset:
             avg_length_of_sentence += len(example['tokens'])
             for i, token in enumerate(example['tokens']):
-                if example['dialogue_act'][i].startswith('B-'):
-                    total_number_of_dialogue_act += 1
-                    name = example['dialogue_act'][i].split('-')[1]
-                    if name not in dialogue_act_number:
-                        dialogue_act_number[name] = 1
+                if example['domain'][i].startswith('B-'):
+                    total_number_of_domain += 1
+                    name = example['domain'][i].split('-')[1]
+                    if name not in domain_number:
+                        domain_number[name] = 1
                     else:
-                        dialogue_act_number[name] += 1
-                    dialogue_act_predicates += 1
+                        domain_number[name] += 1
+                    domain_predicates += 1
                 if example['frame'][i].startswith('B-'):
                     total_number_of_frame += 1
                     name = example['frame'][i].split('-')[1]
@@ -419,37 +419,37 @@ class Dataset(object):
         avg_length_of_sentence = avg_length_of_sentence / len(self.dataset)
         print('Number of sentences:\t\t\t{}'.format(len(self.dataset)))
         print('Average length of sentence:\t\t{}'.format(round(avg_length_of_sentence, 2)))
-        print('Dialogue act label set:\t\t\t{}'.format(len(dialogue_act_number)))
+        print('Dialogue act label set:\t\t\t{}'.format(len(domain_number)))
         print('Frame label set:\t\t\t\t{}'.format(len(frame_number)))
         print('Frame element label set:\t\t{}'.format(len(frame_element_number)))
-        print('Total number of dialogue act:\t{}'.format(total_number_of_dialogue_act))
+        print('Total number of dialogue act:\t{}'.format(total_number_of_domain))
         print('Total number of frame:\t\t\t{}'.format(total_number_of_frame))
         print('Total number of frame element:\t{}'.format(total_number_of_frame_element))
         print('Average dialogue act/sentence:\t{}'.format(
-            round(float(total_number_of_dialogue_act) / len(self.dataset), 2)))
+            round(float(total_number_of_domain) / len(self.dataset), 2)))
         print('Average frame/sentence:\t\t\t{}'.format(
             round(float(total_number_of_frame) / len(self.dataset), 2)))
         print('Average frame element/sentence:\t{}'.format(
             round(float(total_number_of_frame_element) / len(self.dataset), 2)))
         print('Average frame/dialogue act:\t\t{}'.format(
-            round(float(total_number_of_frame) / float(total_number_of_dialogue_act), 2)))
+            round(float(total_number_of_frame) / float(total_number_of_domain), 2)))
         print('Average frame element/frame:\t{}'.format(
             round(float(total_number_of_frame_element) / float(total_number_of_frame), 2)))
         print('Lexical unit distribution:\t\t{}'.format(sorted(lexical_unit_distribution.items(), key=lambda x: x[1],
                                                                reverse=True)))
 
         distribution = OrderedDict()
-        dialogue_act_distribution = OrderedDict()
+        domain_distribution = OrderedDict()
         frame_distribution = OrderedDict()
         frame_element_distribution = OrderedDict()
-        distribution['dialogue_act'] = dialogue_act_distribution
+        distribution['domain'] = domain_distribution
         distribution['frame'] = frame_distribution
         distribution['frame_element'] = frame_element_distribution
 
         print('Dialogue act distribution:\t\t{}'.format(
-            sorted(dialogue_act_number.items(), key=lambda x: x[1], reverse=True)))
-        for label, number in dialogue_act_number.items():
-            dialogue_act_distribution[label] = float(number) / dialogue_act_predicates
+            sorted(domain_number.items(), key=lambda x: x[1], reverse=True)))
+        for label, number in domain_number.items():
+            domain_distribution[label] = float(number) / domain_predicates
         print('Frame distribution:\t\t\t\t{}'.format(
             sorted(frame_number.items(), key=lambda x: x[1], reverse=True)))
         for label, number in frame_number.items():
@@ -463,33 +463,33 @@ class Dataset(object):
 
     def statistics_benchmark(self):
         avg_length_of_sentence = .0
-        total_number_of_dialogue_act = 0
+        total_number_of_domain = 0
         total_number_of_frame = 0
         total_number_of_intent = 0
         total_number_of_frame_element = 0
-        dialogue_act_number = dict()
+        domain_number = dict()
         frame_number = dict()
         frame_element_number = dict()
         intent_number = dict()
         lexical_unit_distribution = dict()
-        dialogue_act_predicates = 0.
+        domain_predicates = 0.
         frame_predicates = 0.
         frame_element_predicates = 0.
         intent_predicates = 0.
         for example in self.dataset:
             avg_length_of_sentence += len(example['tokens'])
             for i, token in enumerate(example['tokens']):
-                dialogue_act_check = False
+                domain_check = False
                 frame_check = False
-                if example['dialogue_act'][i].startswith('B-'):
-                    dialogue_act_check = True
-                    total_number_of_dialogue_act += 1
-                    name = example['dialogue_act'][i][2:]
-                    if name not in dialogue_act_number:
-                        dialogue_act_number[name] = 1
+                if example['domain'][i].startswith('B-'):
+                    domain_check = True
+                    total_number_of_domain += 1
+                    name = example['domain'][i][2:]
+                    if name not in domain_number:
+                        domain_number[name] = 1
                     else:
-                        dialogue_act_number[name] += 1
-                    dialogue_act_predicates += 1
+                        domain_number[name] += 1
+                    domain_predicates += 1
                 if example['frame'][i].startswith('B-'):
                     frame_check = True
                     total_number_of_frame += 1
@@ -499,8 +499,8 @@ class Dataset(object):
                     else:
                         frame_number[name] += 1
                     frame_predicates += 1
-                if dialogue_act_check and frame_check:
-                    name = example['dialogue_act'][i][2:] + '_' + example['frame'][i][2:]
+                if domain_check and frame_check:
+                    name = example['domain'][i][2:] + '_' + example['frame'][i][2:]
                     total_number_of_intent += 1
                     if name not in intent_number:
                         intent_number[name] = 1
@@ -524,16 +524,16 @@ class Dataset(object):
         avg_length_of_sentence = avg_length_of_sentence / len(self.dataset)
         print('Number of sentences:\t\t\t{}'.format(len(self.dataset)))
         print('Average length of sentence:\t\t{}'.format(round(avg_length_of_sentence, 2)))
-        print('Dialogue act label set:\t\t\t{}'.format(len(dialogue_act_number)))
+        print('Dialogue act label set:\t\t\t{}'.format(len(domain_number)))
         print('Frame label set:\t\t\t\t{}'.format(len(frame_number)))
         print('Frame element label set:\t\t{}'.format(len(frame_element_number)))
         print('Intent label set:\t\t\t\t{}'.format(len(intent_number)))
-        print('Total number of dialogue act:\t{}'.format(total_number_of_dialogue_act))
+        print('Total number of dialogue act:\t{}'.format(total_number_of_domain))
         print('Total number of frame:\t\t\t{}'.format(total_number_of_frame))
         print('Total number of intent:\t\t\t{}'.format(total_number_of_intent))
         print('Total number of frame element:\t{}'.format(total_number_of_frame_element))
         print('Average dialogue act/sentence:\t{}'.format(
-            round(float(total_number_of_dialogue_act) / len(self.dataset), 2)))
+            round(float(total_number_of_domain) / len(self.dataset), 2)))
         print('Average frame/sentence:\t\t\t{}'.format(
             round(float(total_number_of_frame) / len(self.dataset), 2)))
         print('Average intent/sentence:\t\t\t{}'.format(
@@ -541,7 +541,7 @@ class Dataset(object):
         print('Average frame element/sentence:\t{}'.format(
             round(float(total_number_of_frame_element) / len(self.dataset), 2)))
         print('Average frame/dialogue act:\t\t{}'.format(
-            round(float(total_number_of_frame) / float(total_number_of_dialogue_act), 2)))
+            round(float(total_number_of_frame) / float(total_number_of_domain), 2)))
         print('Average frame element/frame:\t{}'.format(
             round(float(total_number_of_frame_element) / float(total_number_of_frame), 2)))
         print('Average frame element/intent:\t{}'.format(
@@ -551,17 +551,17 @@ class Dataset(object):
                                                              reverse=True)))
 
         distribution = OrderedDict()
-        dialogue_act_distribution = OrderedDict()
+        domain_distribution = OrderedDict()
         frame_distribution = OrderedDict()
         frame_element_distribution = OrderedDict()
-        distribution['dialogue_act'] = dialogue_act_distribution
+        distribution['domain'] = domain_distribution
         distribution['frame'] = frame_distribution
         distribution['frame_element'] = frame_element_distribution
 
         print('Dialogue act distribution:\t\t{}'.format(
-            sorted(dialogue_act_number.items(), key=lambda x: x[1], reverse=True)))
-        for label, number in dialogue_act_number.items():
-            dialogue_act_distribution[label] = float(number) / dialogue_act_predicates
+            sorted(domain_number.items(), key=lambda x: x[1], reverse=True)))
+        for label, number in domain_number.items():
+            domain_distribution[label] = float(number) / domain_predicates
         print('Frame distribution:\t\t\t\t{}'.format(
             sorted(frame_number.items(), key=lambda x: x[1], reverse=True)))
         for label, number in frame_number.items():

@@ -31,7 +31,7 @@ parser.add_argument('--monitor', type=str, nargs='+', default=['f1'], help='Moni
 
 args = parser.parse_args()
 
-os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
+os.environ['CUdomain_VISIBLE_DEVICES'] = args.gpu
 
 import learning.network as net
 import data.dataset as data
