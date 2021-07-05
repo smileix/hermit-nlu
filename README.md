@@ -1,46 +1,43 @@
 # HERMIT NLU - HiERarchical MultI-Task Natural Language Understanding
 
-*HERMIT NLU* is a new neural architecture for wide-coverage Natural Language Understanding in Spoken Dialogue Systems. It is based on a hierarchical multi-task architecture, which delivers a multi-layer representation of sentence meaning (i.e., Dialogue Acts and Frame-like structures). The architecture is a hierarchy of self-attention mechanisms and BiLSTM encoders followed by CRF tagging layers.
-
+*HERMIT NLU* 是一种新的神经架构，用于在口语对话系统中进行广泛的自然语言理解。 它基于分层多任务架构，提供句子含义的多层表示,包括domain、frame与frame element，后两者可分别映射为意图与槽。 该架构是自注意力机制和 BiLSTM 编码器的层次结构，后跟 CRF 标记层。
 <center>
 	<img src="hermit_architecture.png" alt="Hermit Architecture" width="500"/>
 </center>
 
-Several experiments have been performed, showing that this approach obtains promising results on a dataset annotated with Dialogue Acts and Frame Semantics.
-HERMIT can also model application-oriented annotation schemes. Experiments over a publicly available NLU dataset annotated with domain-specific intents and corresponding semantic roles, show that HERMIT provides overall performance higher than state-of-the-art tools such as RASA, Dialogflow, LUIS, and Watson.
+已进行了若干实验，表明这种方法在以domain和frame semantic（即frame与frame element）为注释的数据集上取得了有希望的结果。HERMIT NLU还可以模拟面向应用程序的注释方案。对公开可用的 NLU 数据集的实验表明，HERMIT 提供的总体性能高于最先进的工具，如 RASA、Dialogflow、LUIS 和 Watson。
 
-For more details, refer to the paper at the end of the page.
+有关详细信息，请参阅页面末尾的论文。
 
 
-## Dependecies and installation
+## 依赖及其安装
 
-Make sure **Python 2.7** is installed on your machine.
-To setup HERMIT NLU, start by cloning the repository:
+确保使用 **Python 2.7** 环境.
+要运行 HERMIT NLU, 首先clone该repo:
 
 ```
 git clone https://gitlab.com/hwu-ilab/hermit-nlu.git && cd hermit-nlu
 ```
-### [OPTIONAL] Virtual environment (recommended)
-You can create a virtual environment if needed (recommended):
+### [可选] 虚拟环境 (建议)
+建议使用conda创建虚拟环境，在成功安装conda并正确配置环境变量之后，运行:
 
 ```
 conda create -n hermit-nlu python=2.7
 ```
-and activate it:
+然后激活该虚拟环境:
 
 ```
 source activate hermit-nlu
 ```
 
-### Requirements installation
-If you have a GPU, modify the `requirements.txt` to install `tensorflow-gpu` instead of the CPU version (`tensorflow`). Then install the dependencies:
+### 环境安装
+ `requirements.txt` 中是本实验所用到的环境，其中默认使用的是GPU版本的tensorflow，而非CPU版本，请按需更改。环境安装的命令如下:
 
 ```
-pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-Download and install the English model for [spaCy](https://spacy.io):
+下载并安装[spaCy](https://spacy.io)的英文模型:
 
 ```
 python -m spacy download en
@@ -48,38 +45,34 @@ python -m spacy download en
 
 ### Dataset download and conversion
 
-To evaluate and train HERMIT NLU, you need to download the [NLU-Benchmark](https://github.com/xliuhw/NLU-Evaluation-Data) dataset:
+实验所用的原始数据集已经clone到本repo中，下面是其原始地址：
+```
+https://github.com/xliuhw/NLU-Evaluation-Data
+```
+需要对原始数据进行预处理，命令为:
 
 ```
-git clone https://github.com/xliuhw/NLU-Evaluation-Data.git
-```
-and then run the conversion script:
-
-```
-python data/nlu_benchmark/nfold_converters.py NLU-Evaluation-Data/CrossValidation/autoGeneFromRealAnno/autoGene_2018_03_22-13_01_25_169/CrossValidation -o datasets/nlu_benchmark_hrc2 
+chmod +x data_process.sh && ./data_process.sh
 ```
 
-The original files are not needed.
+处理之后，则不再需要原始数据。
 
-## Evaluation
-
-To evaluate the system:
+## 训练与测试
 
 ```
 chmod +x evaluate.sh && ./evaluate.sh
 ``` 
 
-The script will perform a 10Fold evaluation over the NLU-Benchmark dataset and generate the folder `resource/evaluation`. The files in `resource/evaluation/results` refer to the exact match reported in the paper, and to the CoNLL spanF1.
+脚本将在 NLU-基准数据集上执行 10Fold 评估并生成文件夹。文件中提到文件中报告的exact match，以及 CoNLL spanF1
 
-A script computes the metrics reported in Table 3 and 4:
+评测结果会保存到resource/evaluation文件夹中，有三个子目录，分别是encoder，用于保存每个fold的训练数据，predication，用于保存每个fold的预测结果，results，用于保存每个fold预的测指标。
 
+总体指标由下面的命令计算：
 ```
-python data/nlu_benchmark/evaluation.py -f resources/evaluation/predictions/
+chmod +x toal_metrics.sh && ./total_metrics.sh
 ```
 
-## References
-
-Please consider citing the following paper if you find this repository useful.
+## 参考文献
 
 ```
 
